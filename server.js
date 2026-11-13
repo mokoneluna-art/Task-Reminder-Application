@@ -13,7 +13,7 @@ app.post('/api/reminder', (req, res) => {
         reminder.setReminder();
         reminder.sendNotification();
 
-        res.json({ success: true, message: `Success! Reminder set for ${taskName}. Check VS Code terminal!` });
+        res.json({ success: true, message: `Success! Your reminder for "${taskName}" has been set.` });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
     }

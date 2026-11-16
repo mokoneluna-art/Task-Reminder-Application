@@ -1,4 +1,28 @@
- // Validates the date string and converts it to a Date object  <-- ADD THIS LINE
+const { EmailChannel, SmsChannel } = require("./channels");
+
+const CHANNEL_REGISTRY = {
+  email: new EmailChannel(),
+  sms: new SmsChannel(),
+};
+
+class TaskReminder {
+  constructor(taskName, reminderTime, notificationType) {
+    if (!taskName || taskName.trim() === "") {
+      throw new Error("Task name cannot be empty.");
+    }
+
+    // SANITIZATION: Remove any HTML tags or dangerous characters
+    this.taskName = taskName.replace(/[<>]/g, "");
+    
+    this.reminderTime = TaskReminder.parseTime(reminderTime);
+    this.notificationType = notificationType.toLowerCase();
+
+    if (!CHANNEL_REGISTRY[this.notificationType]) {
+      throw new Error(`Unsupported notification type: ${notificationType}`);
+    }
+  }
+
+  // Validates the date string and converts it to a Date object
   static parseTime(reminderTime) {
     const pattern = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
     if (!pattern.test(reminderTime)) {
@@ -18,15 +42,17 @@
     );
   }
 
-  // Sends the notification using the correct channel from the registry  <-- ADD THIS LINE
+  // Sends the notification using the correct channel from the registry
   sendNotification() {
     const channel = CHANNEL_REGISTRY[this.notificationType];
     const message = `Reminder: '${this.taskName}' is due at ${this.reminderTime.toISOString()}.`;
     return channel.send(this.taskName, message);
   }
 
-  // Checks if the current time has passed the reminder time  <-- ADD THIS LINE
+  // Checks if the current time has passed the reminder time
   isDue(now = new Date()) {
     return now >= this.reminderTime;
   }
 }
+
+module.exports = TaskReminder;
